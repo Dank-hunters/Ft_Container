@@ -6,93 +6,164 @@
 /*   By: cguiot <cguiot@student.42lyon.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/17 16:53:05 by cguiot            #+#    #+#             */
-/*   Updated: 2022/06/17 17:57:26 by cguiot           ###   ########lyon.fr   */
+/*   Updated: 2022/06/20 17:20:45 by cguiot           ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
+#pragma once
+#include <__config>
+#include <iosfwd> // for forward declaration of vector
+#include <__bit_reference>
+#include <type_traits>
+#include <climits>
+#include <limits>
+#include <initializer_list>
+#include <memory>
+#include <stdexcept>
+#include <algorithm>
+#include <cstring>
+#include <__cxx_version>
+#include <__split_buffer>
+#include <__functional_base>
+
+#include <__debug>
 # include <vector>
 
 namespace ft
 {
 
-template <class T, class Allocator = std::allocator<T> >
+template <class T, class Alloc = std::allocator<T> >
 class vector
 {
-    private
-public:
+    
+    public:
     typedef T                                        value_type;
-    typedef Allocator                                allocator_type;
+    typedef Alloc                                   allocator_type;
     typedef typename allocator_type::reference       reference;
     typedef typename allocator_type::const_reference const_reference;
-    typedef implementation-defined                   iterator;
-    typedef implementation-defined                   const_iterator;
+    typedef implementation_defined                   iterator;
+    typedef implementation_defined                   const_iterator;
     typedef typename allocator_type::size_type       size_type;
     typedef typename allocator_type::difference_type difference_type;
     typedef typename allocator_type::pointer         pointer;
     typedef typename allocator_type::const_pointer   const_pointer;
     typedef std::reverse_iterator<iterator>          reverse_iterator;
     typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
+    
+    private :
+    pointer	_start;
+	pointer	_end;
+	pointer	_end_of_storage;
+    allocator_type _alloc;
 
-    vector(){}
-        //noexcept(is_nothrow_default_constructible<allocator_type>::value);
-    explicit vector(const allocator_type&);
-    explicit vector(size_type n);
-    explicit vector(size_type n, const allocator_type&); // C++14
-    vector(size_type n, const value_type& value, const allocator_type& = allocator_type());
-   
-   
-    template <class InputIterator>
-        vector(InputIterator first, InputIterator last, const allocator_type& = allocator_type());
+public :    
+    /////////////////////////////////  constuctoeur / destructeur    \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\/
     
-    vector(const vector& x);
-    vector(vector&& x)
-        noexcept(is_nothrow_move_constructible<allocator_type>::value);
+    //default constructor
+    vector(const allocator_type& alloc = allocator_type()) : _start(NULL), _end(NULL), _end_of_storage(NULL), _alloc(alloc) {}
+
+    // Fill Constructor
+    vector(size_type n,
+    		const value_type& val = value_type(),
+    		const allocator_type& alloc = allocator_type()) : _start(NULL), _end(NULL), _end_of_storage(NULL), _alloc(alloc) {assign(n, val);}
     
+    // Range Constructor
+    template < class InputIterator >
+    vector(InputIterator first, InputIterator last, const allocator_type& alloc = allocator_type()) : _start(NULL), _end(NULL), _end_of_storage(NULL), _alloc(alloc) { assign(first, last);}
     
-    vector(initializer_list<value_type> il);
-    vector(initializer_list<value_type> il, const allocator_type& a);
+    // Copy Constructor
+    vector(const vector& x) : _start(NULL), _end(NULL), _end_of_storage(NULL), _alloc(x._alloc) { *this = x }
+
+    //default destructor
     ~vector();
     
+    
+    
+    
+
+
+    /////////////////////////////////  operator   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+   
     vector& operator=(const vector& x);
-    vector& operator=(vector&& x)
-        noexcept(
-             allocator_type::propagate_on_container_move_assignment::value ||
-             allocator_type::is_always_equal::value); // C++17
-    vector& operator=(initializer_list<value_type> il);
-    
-    
-    
+    {
+            clear();
+			if (capacity() > x.size())
+			{
+				insert(begin(), x.begin(), x.end());
+			}
+            else
+				assign(x.begin(), x.end());
+			return *this;
+	}
+
+
+
+    /////////////////////////////////  assign   \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+    //range
     template <class InputIterator>
         void assign(InputIterator first, InputIterator last);
-    void assign(size_type n, const value_type& u);
-    void assign(initializer_list<value_type> il);
-
     
+    //fill
+    void assign(size_type n, const value_type& u);
+    {
+        if (n = 0)
+        return;
+        if (n < capacity())
+            init_blo
+    }
+    
+    /*void assign (size_type n, const value_type& val)
+		{
+			if (n == 0)
+				return ;
+			if (n > capacity())
+				init_block(n);
+			else
+				rm_size(size()); // size == 0
+			add_size(n, val);
+		}
+
+		template < class Ite >
+		typename ft::enable_if<ft::is_input_iterator<Ite> >::type
+		assign (Ite f, Ite l)
+		{
+			size_type s = 0;
+
+			for (Ite it = f; it != l; it++)
+				++s;
+			if (s > capacity())
+				init_block(s);
+			else
+				rm_size(size()); // size == 0
+			add_range(f, l);
+		}*/
     
     //allocator_type get_allocator() const noexcept;
 
-    iterator               begin() noexcept;
-    const_iterator         begin()   const noexcept;
-    iterator               end() noexcept;
-    const_iterator         end()     const noexcept;
+    iterator               begin() ;
+    const_iterator         begin()   const ;
+    iterator               end() ;
+    const_iterator         end()     const ;
 
-    reverse_iterator       rbegin() noexcept;
-    const_reverse_iterator rbegin()  const noexcept;
-    reverse_iterator       rend() noexcept;
-    const_reverse_iterator rend()    const noexcept;
+    reverse_iterator       rbegin() ;
+    const_reverse_iterator rbegin()  const ;
+    reverse_iterator       rend() ;
+    const_reverse_iterator rend()    const ;
 
-    const_iterator         cbegin()  const noexcept;
-    const_iterator         cend()    const noexcept;
-    const_reverse_iterator crbegin() const noexcept;
-    const_reverse_iterator crend()   const noexcept;
-
-
+    const_iterator         cbegin()  const ;
+    const_iterator         cend()    const ;
+    const_reverse_iterator crbegin() const ;
+    const_reverse_iterator crend()   const ;
 
 
-    size_type size() const noexcept;
-    size_type max_size() const noexcept;
-    size_type capacity() const noexcept;
-    bool empty() const noexcept;
+
+
+    size_type size() const ;
+    size_type max_size() const ;
+    size_type capacity() const ;
+    bool empty() const ;
     void reserve(size_type n);
    // void shrink_to_fit() noexcept;
 
@@ -136,13 +207,13 @@ public:
     iterator erase(const_iterator position);
     iterator erase(const_iterator first, const_iterator last);
 
-    void clear() noexcept;
+    void clear() ;
 
     void resize(size_type sz);
     void resize(size_type sz, const value_type& c);
 
     void swap(vector&)
-        noexcept(allocator_traits<allocator_type>::propagate_on_container_swap::value ||
+        (allocator_traits<allocator_type>::propagate_on_container_swap::value ||
                  allocator_traits<allocator_type>::is_always_equal::value);  // C++17
 
     
