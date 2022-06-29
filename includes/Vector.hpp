@@ -6,7 +6,7 @@
 /*   By: cguiot <cguiot@student.42lyon.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/06/17 16:53:05 by cguiot            #+#    #+#             */
-/*   Updated: 2022/06/21 14:47:32 by cguiot           ###   ########lyon.fr   */
+/*   Updated: 2022/06/29 18:50:52 by cguiot           ###   ########lyon.fr   */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,9 @@
 #include <__cxx_version>
 #include <__split_buffer>
 #include <__functional_base>
-#include <iterator/vector_iterator.hpp>
-#include <iterator/iterator.hpp>
-
+#include <type_traits>
+#include "iterator_traits.hpp"
+#include "reverse_iterator.hpp"
 #include <__debug>
 # include <vector>
 
@@ -41,18 +41,23 @@ class vector
     public:
     typedef T                                        value_type;
     typedef Alloc                                    allocator_type;
+  
     typedef typename allocator_type::reference       reference;
     typedef typename allocator_type::const_reference const_reference;
-    typedef vector_iterator<T, T&, T*> 					iterator;
-	typedef vector_iterator<T, const T&, const T*> 		const_iterator;
-   // typedef implementation_defined                   iterator;
-    //~typedef implementation_defined                   const_iterator;
     typedef typename allocator_type::size_type       size_type;
-    typedef typename allocator_type::difference_type difference_type;
     typedef typename allocator_type::pointer         pointer;
     typedef typename allocator_type::const_pointer   const_pointer;
-    typedef std::reverse_iterator<iterator>          reverse_iterator;
+    
+	typedef typename ft::iterator_traits<iterator>::difference_type difference_type; //same as ptrdiff
+
+    
+    typedef ft::random_access_iterator<value_type>				iterator;
+	typedef ft::random_access_iterator<const value_type> 		const_iterator;
+    typedef std::reverse_iterator<iterator>          reverse_iterator;    
     typedef std::reverse_iterator<const_iterator>    const_reverse_iterator;
+
+
+
     
     private :
     pointer	_start;
@@ -118,33 +123,24 @@ public :
        //     init_blo
     }
     
-    /*void assign (size_type n, const value_type& val)
-		{
-			if (n == 0)
-				return ;
-			if (n > capacity())
-				init_block(n);
-			else
-				rm_size(size()); // size == 0
-			add_size(n, val);
-		}
 
-		template < class Ite >
-		typename ft::enable_if<ft::is_input_iterator<Ite> >::type
-		assign (Ite f, Ite l)
-		{
-			size_type s = 0;
-
-			for (Ite it = f; it != l; it++)
-				++s;
-			if (s > capacity())
-				init_block(s);
-			else
-				rm_size(size()); // size == 0
-			add_range(f, l);
-		}*/
-    
     //allocator_type get_allocator() const noexcept;
+
+
+    reverse_iterator       rbegin()
+        {return       reverse_iterator(end());}
+   
+    const_reverse_iterator rbegin()  const
+        {return const_reverse_iterator(end());}
+   
+    reverse_iterator       rend()
+        {return       reverse_iterator(begin());}
+   
+    const_reverse_iterator rend()    const
+        {return const_reverse_iterator(begin());}
+
+   
+
 
     iterator               begin() {return (iterator(_start));}
     const_iterator         begin()   const ; {return (const_iterator(_start));}
@@ -152,11 +148,14 @@ public :
     iterator               end()  {return (iterator(_end));}
     const_iterator         end() const  {return (const_iterator(_end));}
 
-   	reverse_iterator rbegin() { iterator it = end(); return reverse_iterator(it); }
-	const_reverse_iterator rbegin() const { const_iterator it = end(); return const_reverse_iterator(it); }
-	
-    reverse_iterator rend() { iterator it = begin(); return reverse_iterator(it); }
-	const_reverse_iterator rend() const { const_iterator it = begin(); return const_reverse_iterator(it); }
+
+
+
+
+
+
+
+
 
 
  	size_type size(void) const { return static_cast<size_type>(_end - _start); }
@@ -173,10 +172,30 @@ public :
     reference       at(size_type n);
     const_reference at(size_type n) const;
 
-    reference       front();
-    const_reference front() const;
-    reference       back();
-    const_reference back() const;
+
+
+
+
+    reference       front()
+    {
+        return *this->__begin_;
+    }
+    const_reference front() const
+    {
+        return *this->__begin_;
+    }
+    reference       back()
+    {
+        return *(this->__end_ - 1);
+    }
+    const_reference back()  const
+    {
+        return *(this->__end_ - 1);
+    }
+
+
+
+
 
     //value_type*       data() noexcept;
     //const value_type* data() const noexcept;
